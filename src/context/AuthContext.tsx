@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     // Mock authentication - in a real app, this would validate against a backend
     try {
+      if (!password) throw new Error('Password is required');
       // Extract name from email (temporary solution until we have proper backend)
       const name = email.split('@')[0];
       setUser({
@@ -36,6 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (name: string, email: string, password: string) => {
     // Mock registration - in a real app, this would create a user in the backend
     try {
+      if (!password) throw new Error('Password is required');
       setUser({
         id: '1',
         email,
