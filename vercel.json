@@ -18,6 +18,12 @@
       }
     },
     {
+      "src": "/(.*).js",
+      "headers": {
+        "content-type": "application/javascript"
+      }
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
@@ -25,6 +31,15 @@
   "headers": [
     {
       "source": "/(.*).js",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
       "headers": [
         {
           "key": "Content-Type",
