@@ -5,13 +5,14 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './',
+  base: '/',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: path.resolve(__dirname, 'index.html'),
-      
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
       output: {
         format: 'es',
         manualChunks: undefined,
