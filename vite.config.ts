@@ -10,9 +10,8 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html'),
-      },
+      input: path.resolve(__dirname, 'index.html'),
+      
       output: {
         format: 'es',
         manualChunks: undefined,
