@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
 import ThemeToggle from '../components/ThemeToggle';
@@ -9,6 +10,7 @@ import {
   ListBulletIcon,
   CheckIcon,
 } from '@heroicons/react/24/outline';
+import { Task } from '../types';
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -19,8 +21,41 @@ interface StatCardProps {
 }
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const { tasks, updateTask } = useTasks();
+  const { user, isAdmin } = useAuth();
+  const { getAllTasks, updateTask } = useTasks();
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      const userTasks = getAllTasks();
+      setTasks(userTasks);
+    }
+  }, [user, getAllTasks]);
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  if (isAdmin()) {
+    return <Navigate to="/admin" />;
+  }
+
+  const toggleTaskCompletion = (taskId: string, completed: boolean) => {
+    updateTask(taskId, { completed });
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((task) => task.completed).length;
@@ -41,17 +76,18 @@ const Dashboard = () => {
                 TaskNest
               </span>
             </Link>
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-4">
               <ThemeToggle />
-              <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base truncate max-w-[120px] sm:max-w-none transition-colors duration-200">
-                Welcome, {user?.name}
-              </span>
-              <Link
-                to="/tasks"
-                className="bg-blue-600 dark:bg-blue-500 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200 text-sm font-medium shadow-md hover:shadow-lg"
-              >
-                View Tasks
-              </Link>
+              <div className="flex items-center space-x-3">
+                <img
+                  src={user?.avatar}
+                  alt={user?.name}
+                  className="w-8 h-8 rounded-full"
+                />
+                <span className="text-gray-600 dark:text-gray-300 text-sm sm:text-base">
+                  {user?.name}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -61,7 +97,7 @@ const Dashboard = () => {
       <div className="pt-24 sm:pt-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
           <h1 className="text-xl sm:text-3xl font-bold text-blue-900 dark:text-white mb-8 transition-colors duration-200">
-            Dashboard Overview
+            Your Tasks
           </h1>
 
           {/* Stats Grid */}
@@ -103,11 +139,11 @@ const Dashboard = () => {
             />
           </div>
 
-          {/* Recent Tasks */}
+          {/* Tasks List */}
           <div className="bg-white dark:bg-dark-card rounded-2xl shadow-md overflow-x-auto transition-colors duration-200">
             <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg sm:text-xl font-semibold text-blue-900 dark:text-white transition-colors duration-200">
-                Recent Tasks
+                All Tasks
               </h2>
             </div>
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm sm:text-base">
@@ -128,7 +164,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-dark-card divide-y divide-gray-200 dark:divide-gray-700">
-                {tasks.slice(0, 5).map((task) => (
+                {tasks.map((task) => (
                   <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap max-w-xs truncate">
                       <div className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-200">
@@ -156,7 +192,7 @@ const Dashboard = () => {
                     </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() => updateTask(task.id, { ...task, completed: !task.completed })}
+                        onClick={() => toggleTaskCompletion(task.id, !task.completed)}
                         className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-200 ${
                           task.completed
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800'
@@ -175,7 +211,7 @@ const Dashboard = () => {
                       colSpan={4}
                       className="px-4 sm:px-6 py-8 text-center text-gray-500 dark:text-gray-400 transition-colors duration-200"
                     >
-                      No tasks found. Create your first task to get started!
+                      No tasks assigned yet.
                     </td>
                   </tr>
                 )}

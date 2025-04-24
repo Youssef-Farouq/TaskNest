@@ -23,6 +23,15 @@ const PREDEFINED_USERS = {
   }
 };
 
+// Initialize localStorage with predefined users if it's empty
+const initializeUsers = () => {
+  const existingUsers = localStorage.getItem('users');
+  if (!existingUsers) {
+    const initialUsers = [PREDEFINED_USERS.admin, PREDEFINED_USERS.user];
+    localStorage.setItem('users', JSON.stringify(initialUsers));
+  }
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -37,6 +46,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
+  // Initialize users in localStorage when the app starts
+  useEffect(() => {
+    initializeUsers();
+  }, []);
+
   useEffect(() => {
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
@@ -45,6 +59,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user]);
 
+  const addUserToStorage = (newUser: User) => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const existingUserIndex = users.findIndex((u: User) => u.id === newUser.id);
+    
+    if (existingUserIndex >= 0) {
+      users[existingUserIndex] = newUser;
+    } else {
+      users.push(newUser);
+    }
+    
+    localStorage.setItem('users', JSON.stringify(users));
+  };
+
   const login = async (email: string, password: string) => {
     try {
       if (!password) throw new Error('Password is required');
@@ -52,9 +79,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Check for predefined users
       if (email === PREDEFINED_USERS.admin.email && password === 'admin123') {
         setUser(PREDEFINED_USERS.admin);
+        addUserToStorage(PREDEFINED_USERS.admin);
         return;
       } else if (email === PREDEFINED_USERS.user.email && password === 'user123') {
         setUser(PREDEFINED_USERS.user);
+        addUserToStorage(PREDEFINED_USERS.user);
         return;
       }
 
@@ -69,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff`,
       };
       setUser(newUser);
+      addUserToStorage(newUser);
     } catch (error) {
       throw new Error('Invalid credentials');
     }
@@ -96,6 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff`,
       };
       setUser(newUser);
+      addUserToStorage(newUser);
     } catch (error) {
       throw new Error('Registration failed');
     }

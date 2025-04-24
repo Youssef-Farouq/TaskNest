@@ -7,11 +7,16 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
-import TaskManagement from './pages/TaskManagement';
+import AdminDashboard from './pages/AdminDashboard';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   return user ? <>{children}</> : <Navigate to="/login" />;
+};
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isAdmin } = useAuth();
+  return user && isAdmin() ? <>{children}</> : <Navigate to="/dashboard" />;
 };
 
 const App = () => {
@@ -35,11 +40,11 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/tasks"
+                    path="/admin"
                     element={
-                      <PrivateRoute>
-                        <TaskManagement />
-                      </PrivateRoute>
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
                     }
                   />
                 </Routes>
