@@ -1,44 +1,20 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "routes": [
     {
-      "src": "/assets/(.*\\.css)",
+      "src": "/assets/(.*)",
       "headers": {
-        "cache-control": "public, max-age=31536000, immutable",
-        "content-type": "text/css"
+        "cache-control": "public, max-age=31536000, immutable"
       },
-      "dest": "/assets/$1"
+      "continue": true
     },
     {
-      "src": "/assets/(.*\\.js)",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable",
-        "content-type": "application/javascript"
-      },
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*\\.js)",
-      "headers": {
-        "cache-control": "public, max-age=31536000, immutable",
-        "content-type": "application/javascript"
-      },
-      "dest": "/$1"
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "headers": {
-        "cache-control": "public, max-age=0, must-revalidate"
-      },
       "dest": "/index.html"
     }
   ]
