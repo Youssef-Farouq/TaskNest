@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { AuthContextType, User } from '../types';
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -12,19 +12,29 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
   const login = async (email: string, password: string) => {
-    // Mock authentication - in a real app, this would validate against a backend
     try {
       if (!password) throw new Error('Password is required');
-      // Extract name from email (temporary solution until we have proper backend)
       const name = email.split('@')[0];
-      setUser({
-        id: '1',
+      const newUser = {
+        id: crypto.randomUUID(),
         email,
-        name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize first letter
-      });
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+      };
+      setUser(newUser);
     } catch (error) {
       throw new Error('Invalid credentials');
     }
@@ -35,14 +45,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    // Mock registration - in a real app, this would create a user in the backend
     try {
       if (!password) throw new Error('Password is required');
-      setUser({
-        id: '1',
+      const newUser = {
+        id: crypto.randomUUID(),
         email,
         name,
-      });
+      };
+      setUser(newUser);
     } catch (error) {
       throw new Error('Registration failed');
     }
