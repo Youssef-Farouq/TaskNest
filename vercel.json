@@ -27,7 +27,18 @@
       "dest": "/assets/$1"
     },
     {
+      "src": "/(.*\\.js)",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-type": "application/javascript"
+      },
+      "dest": "/$1"
+    },
+    {
       "src": "/(.*)",
+      "headers": {
+        "cache-control": "public, max-age=0, must-revalidate"
+      },
       "dest": "/index.html"
     }
   ]
