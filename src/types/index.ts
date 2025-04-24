@@ -12,6 +12,7 @@ export interface Task {
   createdAt: string;
   userId: string;
   assignedTo?: string;
+  createdBy: string;
 }
 
 export interface User {
@@ -33,11 +34,12 @@ export interface AuthContextType {
 
 export interface TaskContextType {
   tasks: Task[];
-  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'userId'>) => void;
+  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'userId' | 'createdBy'>) => void;
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   getTask: (id: string) => Task | undefined;
   getUserTasks: (userId: string) => Task[];
   getAssignedTasks: (userId: string) => Task[];
   getAllTasks: () => Task[];
+  canAddTask: () => boolean;
 } 

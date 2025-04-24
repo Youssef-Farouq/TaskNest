@@ -23,14 +23,21 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
   }, [tasks]);
 
-  const addTask = (task: Omit<Task, 'id' | 'createdAt' | 'userId'>) => {
-    if (!user) return;
+  const canAddTask = () => {
+    return isAdmin();
+  };
+
+  const addTask = (task: Omit<Task, 'id' | 'createdAt' | 'userId' | 'createdBy'>) => {
+    if (!user || !isAdmin()) {
+      throw new Error('Only administrators can add tasks');
+    }
     
     const newTask: Task = {
       ...task,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
-      userId: user.id,
+      userId: task.assignedTo || user.id,
+      createdBy: user.id,
     };
     setTasks((prevTasks) => [...prevTasks, newTask]);
   };
@@ -91,6 +98,7 @@ export const TaskProvider = ({ children }: { children: ReactNode }) => {
         getUserTasks,
         getAssignedTasks,
         getAllTasks,
+        canAddTask,
       }}
     >
       {children}
