@@ -1,5 +1,7 @@
 export type Priority = 'low' | 'medium' | 'high';
 
+export type UserRole = 'admin' | 'user';
+
 export interface Task {
   id: string;
   title: string;
@@ -8,12 +10,17 @@ export interface Task {
   dueDate: string;
   completed: boolean;
   createdAt: string;
+  userId: string;
+  assignedTo?: string;
 }
 
 export interface User {
   id: string;
   email: string;
   name: string;
+  role: UserRole;
+  createdAt: string;
+  avatar?: string;
 }
 
 export interface AuthContextType {
@@ -21,12 +28,16 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (email: string, password: string, name: string) => Promise<void>;
+  isAdmin: () => boolean;
 }
 
 export interface TaskContextType {
   tasks: Task[];
-  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'userId'>) => void;
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   getTask: (id: string) => Task | undefined;
+  getUserTasks: (userId: string) => Task[];
+  getAssignedTasks: (userId: string) => Task[];
+  getAllTasks: () => Task[];
 } 
