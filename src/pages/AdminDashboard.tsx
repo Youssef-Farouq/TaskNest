@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTasks } from '../context/TaskContext';
@@ -72,6 +72,16 @@ const AdminDashboard = () => {
     setIsModalOpen(false);
   };
 
+  // Update form data when selected user changes
+  useEffect(() => {
+    if (selectedUser) {
+      setFormData(prev => ({
+        ...prev,
+        userId: selectedUser.id
+      }));
+    }
+  }, [selectedUser]);
+
   const handleDeleteUser = (userId: string) => {
     // Don't allow deleting the admin
     if (userId === user.id) {
@@ -126,98 +136,102 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="pt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* User List */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-              Users
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              Users & Tasks Management
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {users.map((u: User) => (
-                <div
-                  key={u.id}
-                  className={`p-4 rounded-lg shadow-md transition-all relative ${
-                    u.id === selectedUser?.id
-                      ? 'bg-blue-50 dark:bg-blue-900 border-2 border-blue-500'
-                      : 'bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                selectedUser
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+              disabled={!selectedUser}
+            >
+              <PlusIcon className="h-5 w-5 mr-1.5" />
+              Add Task {selectedUser ? `for ${selectedUser.name}` : '(Select a user first)'}
+            </button>
+          </div>
+
+          {/* Users Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {users.map((u: User) => (
+              <div
+                key={u.id}
+                className={`p-4 rounded-lg shadow-md transition-all relative ${
+                  u.id === selectedUser?.id
+                    ? 'bg-blue-50 dark:bg-blue-900 border-2 border-blue-500'
+                    : 'bg-white dark:bg-dark-card hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+              >
+                <button
+                  onClick={() => setSelectedUser(u.id === selectedUser?.id ? null : u)}
+                  className="w-full text-left"
                 >
-                  <button
-                    onClick={() => setSelectedUser(u.id === selectedUser?.id ? null : u)}
-                    className="w-full text-left"
-                  >
-                    <div className="flex items-center">
-                      <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-full">
-                        <UserIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {u.name}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {u.email}
-                        </p>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
-                          u.role === 'admin' 
-                            ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-                            : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        }`}>
-                          {u.role}
-                        </span>
-                      </div>
+                  <div className="flex items-center">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-800 rounded-full">
+                      <UserIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                  </button>
-                  
-                  {/* Delete User Button (only show for non-admin users) */}
-                  {u.role !== 'admin' && (
-                    <div className="absolute top-2 right-2">
-                      {showDeleteConfirm === u.id ? (
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handleDeleteUser(u.id)}
-                            className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                            title="Confirm Delete"
-                          >
-                            <CheckIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => setShowDeleteConfirm(null)}
-                            className="p-1 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
-                            title="Cancel"
-                          >
-                            <XMarkIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                      ) : (
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                        {u.name}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {u.email}
+                      </p>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        u.role === 'admin' 
+                          ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                          : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                      }`}>
+                        {u.role}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+                
+                {/* Delete User Button (only show for non-admin users) */}
+                {u.role !== 'admin' && (
+                  <div className="absolute top-2 right-2">
+                    {showDeleteConfirm === u.id ? (
+                      <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => setShowDeleteConfirm(u.id)}
-                          className="p-1 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400"
-                          title="Delete User"
+                          onClick={() => handleDeleteUser(u.id)}
+                          className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                          title="Confirm Delete"
                         >
-                          <TrashIcon className="h-5 w-5" />
+                          <CheckIcon className="h-5 w-5" />
                         </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                        <button
+                          onClick={() => setShowDeleteConfirm(null)}
+                          className="p-1 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+                          title="Cancel"
+                        >
+                          <XMarkIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowDeleteConfirm(u.id)}
+                        className="p-1 text-gray-400 hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400"
+                        title="Delete User"
+                      >
+                        <TrashIcon className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
           {/* Tasks Section */}
           <div className="bg-white dark:bg-dark-card rounded-lg shadow-md">
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {selectedUser ? `${selectedUser.name}'s Tasks` : 'All Tasks'}
               </h2>
-              {selectedUser && (
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
-                >
-                  <PlusIcon className="h-5 w-5 mr-1" />
-                  Add Task
-                </button>
-              )}
             </div>
             
             <div className="overflow-x-auto">
