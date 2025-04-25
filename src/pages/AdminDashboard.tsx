@@ -257,52 +257,73 @@ const AdminDashboard = () => {
                 </thead>
                 <tbody className="bg-white dark:bg-dark-card divide-y divide-gray-200 dark:divide-gray-700">
                   {userTasks.map((task: Task) => (
-                    <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900 dark:text-white">
                           {task.title}
                         </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          {task.description}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        <span className={`px-3 py-1.5 inline-flex text-xs leading-5 font-semibold rounded-full transition-all duration-200 shadow-sm ${
                           task.priority === 'high'
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200 ring-1 ring-red-200 dark:ring-red-800'
                             : task.priority === 'medium'
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                            : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200 ring-1 ring-yellow-200 dark:ring-yellow-800'
+                            : 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200 ring-1 ring-green-200 dark:ring-green-800'
                         }`}>
                           {task.priority}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(task.dueDate).toLocaleDateString()}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                          <svg className="h-4 w-4 mr-1.5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {new Date(task.dueDate).toLocaleDateString()}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
                           onClick={() => updateTask(task.id, { ...task, completed: !task.completed })}
-                          className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium ${
+                          className={`inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                             task.completed
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                              : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                          }`}
+                              ? 'bg-green-600/20 text-green-400 hover:bg-green-600/30 dark:bg-green-500/20 dark:text-green-400 dark:hover:bg-green-500/30'
+                              : 'bg-amber-600/20 text-amber-400 hover:bg-amber-600/30 dark:bg-amber-500/20 dark:text-amber-400 dark:hover:bg-amber-500/30'
+                          } min-w-[140px]`}
                         >
-                          <CheckIcon className={`h-4 w-4 mr-1.5 ${task.completed ? 'opacity-100' : 'opacity-0'}`} />
-                          {task.completed ? 'Completed' : 'Mark Complete'}
+                          {task.completed ? (
+                            <>
+                              <CheckIcon className="h-4 w-4 mr-2" />
+                              <span>Completed</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg className="h-4 w-4 mr-2 animate-spin-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>Mark Complete</span>
+                            </>
+                          )}
                         </button>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => navigate(`/tasks/${task.id}`)}
-                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 mr-3"
-                        >
-                          <PencilIcon className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => deleteTask(task.id)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                        >
-                          <TrashIcon className="h-5 w-5" />
-                        </button>
+                        <div className="flex items-center justify-end space-x-2">
+                          <button
+                            onClick={() => navigate(`/tasks/${task.id}`)}
+                            className="p-2 text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/50 rounded-lg transition-all duration-200"
+                          >
+                            <PencilIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => deleteTask(task.id)}
+                            className="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/50 rounded-lg transition-all duration-200"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
